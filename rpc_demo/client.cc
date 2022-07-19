@@ -36,25 +36,24 @@ int main() {//primary instance
   }
   delete it;
 
-  rpc_client client("127.0.0.1", 9000);
-  client.connect();
-  //1. sync call -> async call
-  //2. TryCatchupWithPrimary()
-  //  db_bench
-  //db_impl_read
-
-
-  db->Put(WriteOptions(), "zz", "20");// Put key-value
+  db->Put(WriteOptions(), "zz", "70");// Put key-value
   //db->Put(WriteOptions(), "xx", "2");
   //db->Put(WriteOptions(), "yy", "3");
   //db->Flush(FlushOptions());
 
-  string result = client.call<std::string>("get_value_naive", "zz");
-  cout<<"naive: "<<result<<endl;
+  try {
+    rpc_client client("127.0.0.1", 9000);
+    bool r = client.connect();
+    if (!r) {
+      std::cout << "connect timeout" << std::endl;
+      return 0;
+    }
 
-  result = client.call<std::string>("get_value_catch_up", "zz");
-  cout<<"catch up: "<<result<<endl;
-
+    string result = client.call<std::string>("get_value", "zz");
+    cout<<result<<endl;
+  } catch (const std::exception &e) {
+    std::cout << e.what() << std::endl;
+  }
 
   delete db;
   return 0;

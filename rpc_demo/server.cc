@@ -24,40 +24,30 @@ using ROCKSDB_NAMESPACE::WriteOptions;
 using namespace rest_rpc;
 using namespace rpc_service;
 
-std::string kDBPath = "/Users/zhenghanghu/Desktop/rest_rpc_demo";
-DB* db_naive;
-DB* db;
+const std::string kDBPath = "/Users/zhenghanghu/Desktop/rest_rpc_demo";
+const std::string kSecondaryPath = "/tmp/rocksdb_secondary/";// Secondary instance needs its own directory to store info logs (LOG)
+
 Options options;
+DB* db_secondary = nullptr;
 
-std::string get_value_naive(rpc_conn conn, string key) {
-  string value;
-  Status s = db_naive->Get(ReadOptions(), key, &value);// get value
+std::string get_value(rpc_conn conn, string key) {
+
+  db_secondary->TryCatchUpWithPrimary();
+  std::string value;
+  db_secondary->Get(ReadOptions(), key, &value); 
   return value; 
 }
 
-std::string get_value_catch_up(rpc_conn conn, string key) {
-
-  DB::OpenForReadOnly(options, kDBPath, &db);// open DB
-  string value;
-  db->Get(ReadOptions(), key, &value);// get value
-  delete db;
-
-  return value; 
-
-}
-
-int main() {//read-only instance
-
+int main() {
 
   options.create_if_missing = true;
-  DB::OpenForReadOnly(options, kDBPath, &db_naive);// open DB
-
+  DB::OpenAsSecondary(options, kDBPath, kSecondaryPath, &db_secondary);
+  
   rpc_server server(9000, std::thread::hardware_concurrency());
-  server.register_handler("get_value_naive", get_value_naive);
-  server.register_handler("get_value_catch_up", get_value_catch_up);
+  server.register_handler("get_value", get_value);
 
   server.run();
-  delete db_naive;
+  delete db_secondary;
 
   return 0;
 }
