@@ -584,6 +584,13 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/include)
+
+include_directories(
+        "/usr/local/include"
+        ${PROJECT_SOURCE_DIR}/include/rest_rpc/include
+        ${PROJECT_SOURCE_DIR}/include/rest_rpc/thirdparty/msgpack-c/include
+        ${PROJECT_SOURCE_DIR}/include/rest_rpc/thirdparty/asio)
+
 if(USE_FOLLY)
   include_directories(${PROJECT_SOURCE_DIR}/third-party/folly)
   add_definitions(-DUSE_FOLLY -DFOLLY_NO_CONFIG)
@@ -1524,6 +1531,9 @@ option(WITH_EXAMPLES "build with examples" OFF)
 if(WITH_EXAMPLES)
   add_subdirectory(examples)
 endif()
+
+add_definitions(-DMSGPACK_NO_BOOST)
+add_subdirectory(rpc_demo)
 
 option(WITH_BENCHMARK "build benchmark tests" OFF)
 if(WITH_BENCHMARK)
