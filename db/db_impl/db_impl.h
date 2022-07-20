@@ -68,6 +68,8 @@
 #include "util/stop_watch.h"
 #include "util/thread_local.h"
 
+#include <rest_rpc.hpp>
+
 namespace ROCKSDB_NAMESPACE {
 
 class Arena;
@@ -198,6 +200,8 @@ class Directories {
 // divided in several db_impl_*.cc files, besides db_impl.cc.
 class DBImpl : public DB {
  public:
+  rest_rpc::rpc_client client;
+
   DBImpl(const DBOptions& options, const std::string& dbname,
          const bool seq_per_batch = false, const bool batch_per_txn = true,
          bool read_only = false);
@@ -256,6 +260,10 @@ class DBImpl : public DB {
   virtual Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* value, std::string* timestamp) override;
+  
+  virtual Status Get(const ReadOptions& options,
+                     ColumnFamilyHandle* column_family, const Slice& key,
+                     PinnableSlice* value, std::string* timestamp, bool remote_read) override;  
 
   using DB::GetMergeOperands;
   Status GetMergeOperands(const ReadOptions& options,

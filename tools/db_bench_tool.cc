@@ -329,6 +329,10 @@ DEFINE_bool(reverse_iterator, false,
 
 DEFINE_bool(auto_prefix_mode, false, "Set auto_prefix_mode for seek benchmark");
 
+DEFINE_bool(remote_read, false, "use secondary instance to perform read");
+
+DEFINE_bool(async, false, "use secondary instance to perform async read (remote_read must be true)");
+
 DEFINE_int64(max_scan_distance, 0,
              "Used to define iterate_upper_bound (or iterate_lower_bound "
              "if FLAGS_reverse_iterator is set to true) when value is nonzero");
@@ -3822,6 +3826,8 @@ class Benchmark {
 
   Stats RunBenchmark(int n, Slice name,
                      void (Benchmark::*method)(ThreadState*)) {
+    std::cout<<n<<" "<<name.ToString()<<std::endl;
+    std::cout<<FLAGS_remote_read<<" "<<FLAGS_async<<std::endl;
     SharedState shared;
     shared.total = n;
     shared.num_initialized = 0;
@@ -5995,7 +6001,8 @@ class Benchmark {
               &get_merge_operands_options, &number_of_operands);
         }
       } else {
-        s = db_with_cfh->db->Get(options, cfh, key, &pinnable_val, ts_ptr);
+        //std::cout<<read_operands_<<std::endl;
+        s = db_with_cfh->db->Get(options, cfh, key, &pinnable_val, ts_ptr, FLAGS_remote_read);
       }
 
       if (s.ok()) {

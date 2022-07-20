@@ -24,13 +24,14 @@ using ROCKSDB_NAMESPACE::WriteOptions;
 using namespace rest_rpc;
 using namespace rpc_service;
 
-const std::string kDBPath = "/Users/zhenghanghu/Desktop/rest_rpc_demo";
+const std::string kDBPath = "/Users/zhenghanghu/Desktop/rest_rpc_demo"; // "/tmp/rocksdbtest-501/dbbench";
 const std::string kSecondaryPath = "/tmp/rocksdb_secondary/";// Secondary instance needs its own directory to store info logs (LOG)
 
 Options options;
 DB* db_secondary = nullptr;
 
 std::string get_value(rpc_conn conn, string key) {
+  //cout<<"!!"<<endl;
 
   db_secondary->TryCatchUpWithPrimary();
   std::string value;
@@ -38,13 +39,33 @@ std::string get_value(rpc_conn conn, string key) {
   return value; 
 }
 
+void async_get_value(rpc_conn conn, string key) {
+  //cout<<"??"<<endl;
+
+  auto req_id = conn.lock()->request_id(); // note: you need keep the request id at that
+                                 // time, and pass it into the async thread
+  std::thread thd([conn, req_id, key] {
+    //std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    db_secondary->TryCatchUpWithPrimary();
+    std::string value;
+    db_secondary->Get(ReadOptions(), key, &value); 
+
+    auto conn_sp = conn.lock();
+    if (conn_sp) {
+      conn_sp->pack_and_response(req_id, std::move(value));
+    }
+  });
+  thd.detach();
+}
+
 int main() {
 
-  options.create_if_missing = true;
   DB::OpenAsSecondary(options, kDBPath, kSecondaryPath, &db_secondary);
   
   rpc_server server(9000, std::thread::hardware_concurrency());
   server.register_handler("get_value", get_value);
+  server.register_handler<Async>("async_get_value", async_get_value);
 
   server.run();
   delete db_secondary;

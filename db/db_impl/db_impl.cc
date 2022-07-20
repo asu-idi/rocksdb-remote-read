@@ -108,6 +108,12 @@
 #include "util/string_util.h"
 #include "utilities/trace/replayer_impl.h"
 
+#include<iostream>
+#include <rest_rpc.hpp>
+
+using namespace rest_rpc;
+using namespace rest_rpc::rpc_service;
+
 namespace ROCKSDB_NAMESPACE {
 
 const std::string kDefaultColumnFamilyName("default");
@@ -240,12 +246,16 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
       own_sfm_(options.sst_file_manager == nullptr),
       closed_(false),
       atomic_flush_install_cv_(&mutex_),
+      client("127.0.0.1", 9000),
       blob_callback_(immutable_db_options_.sst_file_manager.get(), &mutex_,
                      &error_handler_, &event_logger_,
                      immutable_db_options_.listeners, dbname_) {
   // !batch_per_trx_ implies seq_per_batch_ because it is only unset for
   // WriteUnprepared, which should use seq_per_batch_.
   assert(batch_per_txn_ || seq_per_batch_);
+
+  client.enable_auto_reconnect(); // automatic reconnect
+  client.enable_auto_heartbeat(); // automatic heartbeat
 
   // Reserve ten files or so for other uses and give the rest to TableCache.
   // Give a large number for setting of "infinite" open files.
@@ -1770,6 +1780,33 @@ Status DBImpl::Get(const ReadOptions& read_options,
   get_impl_options.value = value;
   get_impl_options.timestamp = timestamp;
   Status s = GetImpl(read_options, key, get_impl_options);
+  return s;
+}
+
+Status DBImpl::Get(const ReadOptions& read_options,
+                   ColumnFamilyHandle* column_family, const Slice& key,
+                   PinnableSlice* value, std::string* timestamp, bool remote_read) {
+
+  if( !remote_read ) return Get(read_options, column_family, key, value, timestamp);
+
+  Status s;
+
+  try {
+   
+    bool r = client.connect();
+    if (!r) {
+      std::cout << "connect timeout" << std::endl;
+      return s;
+    }
+
+    std::string result = client.call<std::string>("get_value", key.ToString());
+    //std::cout<<result<<std::endl;
+  } catch (const std::exception &e) {
+    std::cout <<"hi!"<<std::endl;
+    std::cout << e.what() << std::endl;
+  }
+
+  
   return s;
 }
 

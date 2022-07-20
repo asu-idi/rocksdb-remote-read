@@ -51,9 +51,31 @@ int main() {//primary instance
 
     string result = client.call<std::string>("get_value", "zz");
     cout<<result<<endl;
+
+    bool done = false;
+    client.async_call("async_get_value", [&done](asio::error_code ec, string_view data) {
+
+      if (ec) {                
+        std::cout << ec.message() <<" "<< data << "\n";
+        return;
+      }
+
+      auto result = as<std::string>(data);
+      std::cout << result << " async"<<endl;
+      done = true;
+    }, "zz");
+
+      cout<<1<<endl;
+
+      while(!done){
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        cout<<"hi!"<<endl;
+      }
   } catch (const std::exception &e) {
     std::cout << e.what() << std::endl;
   }
+
+  
 
   delete db;
   return 0;
