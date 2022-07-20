@@ -8,11 +8,13 @@
 #include<iostream>
 #include <rest_rpc.hpp>
 #include <fstream>
+#include "util/gflags_compat.h"
 
 #include "rocksdb/db.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/options.h"
 
+using GFLAGS_NAMESPACE::ParseCommandLineFlags;
 using namespace std;
 using ROCKSDB_NAMESPACE::DB;
 using ROCKSDB_NAMESPACE::Options;
@@ -24,23 +26,23 @@ using ROCKSDB_NAMESPACE::WriteOptions;
 using namespace rest_rpc;
 using namespace rpc_service;
 
+DEFINE_int32(port, 9000, "port to deploy the service");
+
 const std::string kDBPath = "/tmp/rocksdbtest-501/dbbench";// "/Users/zhenghanghu/Desktop/rest_rpc_demo";
-const std::string kSecondaryPath = "/tmp/rocksdb_secondary/";// Secondary instance needs its own directory to store info logs (LOG)
 
 Options options;
 DB* db_secondary = nullptr;
 
 std::string get_value(rpc_conn conn, string key) {
-  //cout<<"!!"<<endl;
 
   db_secondary->TryCatchUpWithPrimary();
   std::string value;
   db_secondary->Get(ReadOptions(), key, &value); 
+
   return value; 
 }
 
 void async_get_value(rpc_conn conn, string key) {
-  //cout<<"??"<<endl;
 
   auto req_id = conn.lock()->request_id(); // note: you need keep the request id at that
                                  // time, and pass it into the async thread
@@ -59,11 +61,18 @@ void async_get_value(rpc_conn conn, string key) {
   thd.detach();
 }
 
-int main() {
+int main(int argc, char** argv) {
+
+  ParseCommandLineFlags(&argc, &argv, true);
+
+  options.create_if_missing = true;
+  const std::string kSecondaryPath = "/tmp/" + to_string(FLAGS_port);// Secondary instance needs its own directory to store info logs (LOG)
+  cout<<kSecondaryPath<<endl;
 
   DB::OpenAsSecondary(options, kDBPath, kSecondaryPath, &db_secondary);
   
   rpc_server server(9000, std::thread::hardware_concurrency());
+  cout<<std::thread::hardware_concurrency()<<endl;//8
   server.register_handler("get_value", get_value);
   server.register_handler<Async>("async_get_value", async_get_value);
 
