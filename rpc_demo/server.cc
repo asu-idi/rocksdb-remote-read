@@ -24,7 +24,7 @@ using ROCKSDB_NAMESPACE::WriteOptions;
 using namespace rest_rpc;
 using namespace rpc_service;
 
-const std::string kDBPath = "/Users/zhenghanghu/Desktop/rest_rpc_demo"; // "/tmp/rocksdbtest-501/dbbench";
+const std::string kDBPath = "/tmp/rocksdbtest-501/dbbench";// "/Users/zhenghanghu/Desktop/rest_rpc_demo";
 const std::string kSecondaryPath = "/tmp/rocksdb_secondary/";// Secondary instance needs its own directory to store info logs (LOG)
 
 Options options;

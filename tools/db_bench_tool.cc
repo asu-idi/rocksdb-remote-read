@@ -5919,6 +5919,7 @@ class Benchmark {
   }
 
   void ReadRandom(ThreadState* thread) {
+    int async_done = 0;
     int64_t read = 0;
     int64_t found = 0;
     int64_t bytes = 0;
@@ -6001,8 +6002,8 @@ class Benchmark {
               &get_merge_operands_options, &number_of_operands);
         }
       } else {
-        //std::cout<<read_operands_<<std::endl;
-        s = db_with_cfh->db->Get(options, cfh, key, &pinnable_val, ts_ptr, FLAGS_remote_read);
+        //std::cout<<"!! "<<thread->tid<<std::endl;
+        s = db_with_cfh->db->Get(options, cfh, key, &pinnable_val, ts_ptr, FLAGS_remote_read, FLAGS_async, async_done);
       }
 
       if (s.ok()) {
@@ -6035,6 +6036,11 @@ class Benchmark {
     if (FLAGS_perf_level > ROCKSDB_NAMESPACE::PerfLevel::kDisable) {
       thread->stats.AddMessage(std::string("PERF_CONTEXT:\n") +
                                get_perf_context()->ToString());
+    }
+
+    while( FLAGS_async && async_done!=reads_ ){//wait until all async read finish
+      //std::cout<<async_done<<std::endl;
+      FLAGS_env->SleepForMicroseconds(5000);//1000000 = 1s
     }
   }
 
