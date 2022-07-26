@@ -31,6 +31,8 @@
 #include "rocksdb/version.h"
 #include "rocksdb/write_buffer_manager.h"
 
+#include <rest_rpc.hpp>
+
 #ifdef max
 #undef max
 #endif
@@ -1454,6 +1456,12 @@ enum ReadTier {
 
 // Options that control read operations
 struct ReadOptions {
+
+  bool remote_read = false;
+  bool async = false;
+  std::function<void(asio::error_code, string_view)> cb;
+
+
   // If "snapshot" is non-nullptr, read as of the supplied snapshot
   // (which must belong to the DB that is being read and which must
   // not have been released).  If "snapshot" is nullptr, use an implicit

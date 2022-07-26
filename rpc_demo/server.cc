@@ -28,7 +28,7 @@ using namespace rpc_service;
 
 DEFINE_int32(port, 9000, "port to deploy the service");
 
-const std::string kDBPath = "/tmp/rocksdbtest-501/dbbench";// "/Users/zhenghanghu/Desktop/rest_rpc_demo";
+const std::string kDBPath = "/tmp/rocksdbtest-501/dbbench"; // "/Users/zhenghanghu/Desktop/rest_rpc_demo";
 
 Options options;
 DB* db_secondary = nullptr;

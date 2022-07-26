@@ -260,10 +260,6 @@ class DBImpl : public DB {
   virtual Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* value, std::string* timestamp) override;
-  
-  virtual Status Get(const ReadOptions& options,
-                     ColumnFamilyHandle* column_family, const Slice& key,
-                     PinnableSlice* value, std::string* timestamp, bool remote_read, bool async, int& async_done) override;  
 
   using DB::GetMergeOperands;
   Status GetMergeOperands(const ReadOptions& options,

@@ -94,6 +94,8 @@
 #include "utilities/merge_operators/sortlist.h"
 #include "utilities/persistent_cache/block_cache_tier.h"
 
+#include <rest_rpc.hpp>
+
 #ifdef MEMKIND
 #include "memory/memkind_kmem_allocator.h"
 #endif
@@ -6003,7 +6005,19 @@ class Benchmark {
         }
       } else {
         //std::cout<<"!! "<<thread->tid<<std::endl;
-        s = db_with_cfh->db->Get(options, cfh, key, &pinnable_val, ts_ptr, FLAGS_remote_read, FLAGS_async, async_done);
+        options.remote_read = FLAGS_remote_read;
+        options.async = FLAGS_async;
+        options.cb = [&async_done](asio::error_code ec, string_view data) {
+          if (ec) {                
+            std::cout << ec.message() <<" "<< data << std::endl;
+            return;
+          }
+          auto result = rest_rpc::as<std::string>(data);
+          async_done++;
+          //std::cout << async_done <<std::endl;
+        };
+
+        s = db_with_cfh->db->Get(options, cfh, key, &pinnable_val, ts_ptr);
       }
 
       if (s.ok()) {

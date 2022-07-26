@@ -567,13 +567,6 @@ class DB {
     return Get(options, DefaultColumnFamily(), key, value, timestamp);
   }
 
-  virtual Status Get(const ReadOptions& options,
-                     ColumnFamilyHandle* column_family, const Slice& key,
-                     PinnableSlice* value, std::string* timestamp, bool remote_read, bool async, int& async_done){
-    return Status::NotSupported(
-        "remote read Get() is not implemented.");
-  }  
-
   // Populates the `merge_operands` array with all the merge operands in the DB
   // for `key`. The `merge_operands` array will be populated in the order of
   // insertion. The number of entries populated in `merge_operands` will be

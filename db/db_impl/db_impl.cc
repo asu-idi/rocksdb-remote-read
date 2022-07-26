@@ -1773,25 +1773,19 @@ Status DBImpl::Get(const ReadOptions& read_options,
 Status DBImpl::Get(const ReadOptions& read_options,
                    ColumnFamilyHandle* column_family, const Slice& key,
                    PinnableSlice* value, std::string* timestamp) {
-  assert(value != nullptr);
-  value->Reset();
-  GetImplOptions get_impl_options;
-  get_impl_options.column_family = column_family;
-  get_impl_options.value = value;
-  get_impl_options.timestamp = timestamp;
-  Status s = GetImpl(read_options, key, get_impl_options);
-  return s;
-}
-
-Status DBImpl::Get(const ReadOptions& read_options,
-                   ColumnFamilyHandle* column_family, const Slice& key,
-                   PinnableSlice* value, std::string* timestamp, bool remote_read, bool async, int& async_done) {
-
-  if( !remote_read ) return Get(read_options, column_family, key, value, timestamp);
-
   Status s;
-  if( !async ){
-    
+  if( !read_options.remote_read ){
+    assert(value != nullptr);
+    value->Reset();
+    GetImplOptions get_impl_options;
+    get_impl_options.column_family = column_family;
+    get_impl_options.value = value;
+    get_impl_options.timestamp = timestamp;
+    s = GetImpl(read_options, key, get_impl_options);
+    return s;
+  }
+
+  if( !read_options.async ){
     try {
       bool r = client.connect();
       if (!r) {
@@ -1802,12 +1796,10 @@ Status DBImpl::Get(const ReadOptions& read_options,
       std::string result = client.call<std::string>("get_value", key.ToString());
       //std::cout<<result<<std::endl;
     } catch (const std::exception &e) {
-      std::cout <<"hi!"<<std::endl;
       std::cout << e.what() << std::endl;
     }
     return s;
   }
-
 
   try {
     bool r = client.connect();
@@ -1816,21 +1808,12 @@ Status DBImpl::Get(const ReadOptions& read_options,
       return s;
     }
 
-    client.async_call("async_get_value", [&async_done](asio::error_code ec, string_view data) {
-
-      if (ec) {                
-        std::cout << ec.message() <<" "<< data << std::endl;
-        return;
-      }
-      auto result = as<std::string>(data);
-      async_done++;
-      //std::cout << async_done <<std::endl;
-    }, key.ToString());
+    client.async_call("async_get_value", read_options.cb, key.ToString());
     
   } catch (const std::exception &e) {
     std::cout << e.what() << std::endl;
   }
-
+  
   return s;
 }
 
