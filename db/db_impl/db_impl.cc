@@ -1808,7 +1808,7 @@ Status DBImpl::Get(const ReadOptions& read_options,
       return s;
     }
 
-    client.async_call("async_get_value", read_options.cb, key.ToString());
+    client.async_call<30*1000>("async_get_value", read_options.cb, key.ToString());
     
   } catch (const std::exception &e) {
     std::cout << e.what() << std::endl;
