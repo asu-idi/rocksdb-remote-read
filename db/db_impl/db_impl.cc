@@ -1792,9 +1792,9 @@ Status DBImpl::Get(const ReadOptions& read_options,
 
     std::string result;
     transport->open();
-    client.put(result, key.ToString());
+    client.get(result, key.ToString());
     transport->close();
-    //std::cout<<result<<std::endl;
+   // std::cout<<result<<std::endl;
 
     /* REST RPC implementation
     try {

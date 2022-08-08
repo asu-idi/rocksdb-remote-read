@@ -1,3 +1,3 @@
 service Serv{
-    string put(1: string key),
+    string get(1: string key),
 }

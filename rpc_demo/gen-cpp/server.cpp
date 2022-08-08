@@ -34,16 +34,14 @@ DB* db_secondary = nullptr;
 class ServHandler : virtual public ServIf {
  public:
   ServHandler() {
-
+    // Your initialization goes here
   }
 
-  void put(std::string& _return, const std::string& key) {
-
+  void get(std::string& _return, const std::string& key) {
     //test if the overhead is caused by TryCatchUpWithPrimary()
     db_secondary->TryCatchUpWithPrimary();
     db_secondary->Get(ReadOptions(), key, &_return);
     //std::cout<<_return<<std::endl;
-
   }
 
 };

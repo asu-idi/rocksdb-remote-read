@@ -9,11 +9,11 @@
 
 
 
-Serv_put_args::~Serv_put_args() noexcept {
+Serv_get_args::~Serv_get_args() noexcept {
 }
 
 
-uint32_t Serv_put_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t Serv_get_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -54,10 +54,10 @@ uint32_t Serv_put_args::read(::apache::thrift::protocol::TProtocol* iprot) {
   return xfer;
 }
 
-uint32_t Serv_put_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t Serv_get_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("Serv_put_args");
+  xfer += oprot->writeStructBegin("Serv_get_args");
 
   xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString(this->key);
@@ -69,14 +69,14 @@ uint32_t Serv_put_args::write(::apache::thrift::protocol::TProtocol* oprot) cons
 }
 
 
-Serv_put_pargs::~Serv_put_pargs() noexcept {
+Serv_get_pargs::~Serv_get_pargs() noexcept {
 }
 
 
-uint32_t Serv_put_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t Serv_get_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("Serv_put_pargs");
+  xfer += oprot->writeStructBegin("Serv_get_pargs");
 
   xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString((*(this->key)));
@@ -88,11 +88,11 @@ uint32_t Serv_put_pargs::write(::apache::thrift::protocol::TProtocol* oprot) con
 }
 
 
-Serv_put_result::~Serv_put_result() noexcept {
+Serv_get_result::~Serv_get_result() noexcept {
 }
 
 
-uint32_t Serv_put_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t Serv_get_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -133,11 +133,11 @@ uint32_t Serv_put_result::read(::apache::thrift::protocol::TProtocol* iprot) {
   return xfer;
 }
 
-uint32_t Serv_put_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t Serv_get_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("Serv_put_result");
+  xfer += oprot->writeStructBegin("Serv_get_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRING, 0);
@@ -150,11 +150,11 @@ uint32_t Serv_put_result::write(::apache::thrift::protocol::TProtocol* oprot) co
 }
 
 
-Serv_put_presult::~Serv_put_presult() noexcept {
+Serv_get_presult::~Serv_get_presult() noexcept {
 }
 
 
-uint32_t Serv_put_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t Serv_get_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -195,18 +195,18 @@ uint32_t Serv_put_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
   return xfer;
 }
 
-void ServClient::put(std::string& _return, const std::string& key)
+void ServClient::get(std::string& _return, const std::string& key)
 {
-  send_put(key);
-  recv_put(_return);
+  send_get(key);
+  recv_get(_return);
 }
 
-void ServClient::send_put(const std::string& key)
+void ServClient::send_get(const std::string& key)
 {
   int32_t cseqid = 0;
-  oprot_->writeMessageBegin("put", ::apache::thrift::protocol::T_CALL, cseqid);
+  oprot_->writeMessageBegin("get", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  Serv_put_pargs args;
+  Serv_get_pargs args;
   args.key = &key;
   args.write(oprot_);
 
@@ -215,7 +215,7 @@ void ServClient::send_put(const std::string& key)
   oprot_->getTransport()->flush();
 }
 
-void ServClient::recv_put(std::string& _return)
+void ServClient::recv_get(std::string& _return)
 {
 
   int32_t rseqid = 0;
@@ -235,12 +235,12 @@ void ServClient::recv_put(std::string& _return)
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("put") != 0) {
+  if (fname.compare("get") != 0) {
     iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  Serv_put_presult result;
+  Serv_get_presult result;
   result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
@@ -250,7 +250,7 @@ void ServClient::recv_put(std::string& _return)
     // _return pointer has now been filled
     return;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "put failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get failed: unknown result");
 }
 
 bool ServProcessor::dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext) {
@@ -272,38 +272,38 @@ bool ServProcessor::dispatchCall(::apache::thrift::protocol::TProtocol* iprot, :
   return true;
 }
 
-void ServProcessor::process_put(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void ServProcessor::process_get(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = nullptr;
   if (this->eventHandler_.get() != nullptr) {
-    ctx = this->eventHandler_->getContext("Serv.put", callContext);
+    ctx = this->eventHandler_->getContext("Serv.get", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Serv.put");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Serv.get");
 
   if (this->eventHandler_.get() != nullptr) {
-    this->eventHandler_->preRead(ctx, "Serv.put");
+    this->eventHandler_->preRead(ctx, "Serv.get");
   }
 
-  Serv_put_args args;
+  Serv_get_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != nullptr) {
-    this->eventHandler_->postRead(ctx, "Serv.put", bytes);
+    this->eventHandler_->postRead(ctx, "Serv.get", bytes);
   }
 
-  Serv_put_result result;
+  Serv_get_result result;
   try {
-    iface_->put(result.success, args.key);
+    iface_->get(result.success, args.key);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != nullptr) {
-      this->eventHandler_->handlerError(ctx, "Serv.put");
+      this->eventHandler_->handlerError(ctx, "Serv.get");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("put", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("get", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -312,17 +312,17 @@ void ServProcessor::process_put(int32_t seqid, ::apache::thrift::protocol::TProt
   }
 
   if (this->eventHandler_.get() != nullptr) {
-    this->eventHandler_->preWrite(ctx, "Serv.put");
+    this->eventHandler_->preWrite(ctx, "Serv.get");
   }
 
-  oprot->writeMessageBegin("put", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("get", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != nullptr) {
-    this->eventHandler_->postWrite(ctx, "Serv.put", bytes);
+    this->eventHandler_->postWrite(ctx, "Serv.get", bytes);
   }
 }
 
@@ -333,19 +333,19 @@ void ServProcessor::process_put(int32_t seqid, ::apache::thrift::protocol::TProt
   return processor;
 }
 
-void ServConcurrentClient::put(std::string& _return, const std::string& key)
+void ServConcurrentClient::get(std::string& _return, const std::string& key)
 {
-  int32_t seqid = send_put(key);
-  recv_put(_return, seqid);
+  int32_t seqid = send_get(key);
+  recv_get(_return, seqid);
 }
 
-int32_t ServConcurrentClient::send_put(const std::string& key)
+int32_t ServConcurrentClient::send_get(const std::string& key)
 {
   int32_t cseqid = this->sync_->generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(this->sync_.get());
-  oprot_->writeMessageBegin("put", ::apache::thrift::protocol::T_CALL, cseqid);
+  oprot_->writeMessageBegin("get", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  Serv_put_pargs args;
+  Serv_get_pargs args;
   args.key = &key;
   args.write(oprot_);
 
@@ -357,7 +357,7 @@ int32_t ServConcurrentClient::send_put(const std::string& key)
   return cseqid;
 }
 
-void ServConcurrentClient::recv_put(std::string& _return, const int32_t seqid)
+void ServConcurrentClient::recv_get(std::string& _return, const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -386,7 +386,7 @@ void ServConcurrentClient::recv_put(std::string& _return, const int32_t seqid)
         iprot_->readMessageEnd();
         iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("put") != 0) {
+      if (fname.compare("get") != 0) {
         iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         iprot_->readMessageEnd();
         iprot_->getTransport()->readEnd();
@@ -395,7 +395,7 @@ void ServConcurrentClient::recv_put(std::string& _return, const int32_t seqid)
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      Serv_put_presult result;
+      Serv_get_presult result;
       result.success = &_return;
       result.read(iprot_);
       iprot_->readMessageEnd();
@@ -407,7 +407,7 @@ void ServConcurrentClient::recv_put(std::string& _return, const int32_t seqid)
         return;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "put failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get failed: unknown result");
     }
     // seqid != rseqid
     this->sync_->updatePending(fname, mtype, rseqid);

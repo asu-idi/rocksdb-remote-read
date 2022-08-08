@@ -22,7 +22,7 @@
 class ServIf {
  public:
   virtual ~ServIf() {}
-  virtual void put(std::string& _return, const std::string& key) = 0;
+  virtual void get(std::string& _return, const std::string& key) = 0;
 };
 
 class ServIfFactory {
@@ -52,43 +52,43 @@ class ServIfSingletonFactory : virtual public ServIfFactory {
 class ServNull : virtual public ServIf {
  public:
   virtual ~ServNull() {}
-  void put(std::string& /* _return */, const std::string& /* key */) override {
+  void get(std::string& /* _return */, const std::string& /* key */) override {
     return;
   }
 };
 
-typedef struct _Serv_put_args__isset {
-  _Serv_put_args__isset() : key(false) {}
+typedef struct _Serv_get_args__isset {
+  _Serv_get_args__isset() : key(false) {}
   bool key :1;
-} _Serv_put_args__isset;
+} _Serv_get_args__isset;
 
-class Serv_put_args {
+class Serv_get_args {
  public:
 
-  Serv_put_args(const Serv_put_args&);
-  Serv_put_args& operator=(const Serv_put_args&);
-  Serv_put_args() noexcept
+  Serv_get_args(const Serv_get_args&);
+  Serv_get_args& operator=(const Serv_get_args&);
+  Serv_get_args() noexcept
                 : key() {
   }
 
-  virtual ~Serv_put_args() noexcept;
+  virtual ~Serv_get_args() noexcept;
   std::string key;
 
-  _Serv_put_args__isset __isset;
+  _Serv_get_args__isset __isset;
 
   void __set_key(const std::string& val);
 
-  bool operator == (const Serv_put_args & rhs) const
+  bool operator == (const Serv_get_args & rhs) const
   {
     if (!(key == rhs.key))
       return false;
     return true;
   }
-  bool operator != (const Serv_put_args &rhs) const {
+  bool operator != (const Serv_get_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Serv_put_args & ) const;
+  bool operator < (const Serv_get_args & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -96,68 +96,68 @@ class Serv_put_args {
 };
 
 
-class Serv_put_pargs {
+class Serv_get_pargs {
  public:
 
 
-  virtual ~Serv_put_pargs() noexcept;
+  virtual ~Serv_get_pargs() noexcept;
   const std::string* key;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-typedef struct _Serv_put_result__isset {
-  _Serv_put_result__isset() : success(false) {}
+typedef struct _Serv_get_result__isset {
+  _Serv_get_result__isset() : success(false) {}
   bool success :1;
-} _Serv_put_result__isset;
+} _Serv_get_result__isset;
 
-class Serv_put_result {
+class Serv_get_result {
  public:
 
-  Serv_put_result(const Serv_put_result&);
-  Serv_put_result& operator=(const Serv_put_result&);
-  Serv_put_result() noexcept
+  Serv_get_result(const Serv_get_result&);
+  Serv_get_result& operator=(const Serv_get_result&);
+  Serv_get_result() noexcept
                   : success() {
   }
 
-  virtual ~Serv_put_result() noexcept;
+  virtual ~Serv_get_result() noexcept;
   std::string success;
 
-  _Serv_put_result__isset __isset;
+  _Serv_get_result__isset __isset;
 
   void __set_success(const std::string& val);
 
-  bool operator == (const Serv_put_result & rhs) const
+  bool operator == (const Serv_get_result & rhs) const
   {
     if (!(success == rhs.success))
       return false;
     return true;
   }
-  bool operator != (const Serv_put_result &rhs) const {
+  bool operator != (const Serv_get_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Serv_put_result & ) const;
+  bool operator < (const Serv_get_result & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-typedef struct _Serv_put_presult__isset {
-  _Serv_put_presult__isset() : success(false) {}
+typedef struct _Serv_get_presult__isset {
+  _Serv_get_presult__isset() : success(false) {}
   bool success :1;
-} _Serv_put_presult__isset;
+} _Serv_get_presult__isset;
 
-class Serv_put_presult {
+class Serv_get_presult {
  public:
 
 
-  virtual ~Serv_put_presult() noexcept;
+  virtual ~Serv_get_presult() noexcept;
   std::string* success;
 
-  _Serv_put_presult__isset __isset;
+  _Serv_get_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
@@ -188,9 +188,9 @@ class ServClient : virtual public ServIf {
   std::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
-  void put(std::string& _return, const std::string& key) override;
-  void send_put(const std::string& key);
-  void recv_put(std::string& _return);
+  void get(std::string& _return, const std::string& key) override;
+  void send_get(const std::string& key);
+  void recv_get(std::string& _return);
  protected:
   std::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
   std::shared_ptr< ::apache::thrift::protocol::TProtocol> poprot_;
@@ -206,11 +206,11 @@ class ServProcessor : public ::apache::thrift::TDispatchProcessor {
   typedef  void (ServProcessor::*ProcessFunction)(int32_t, ::apache::thrift::protocol::TProtocol*, ::apache::thrift::protocol::TProtocol*, void*);
   typedef std::map<std::string, ProcessFunction> ProcessMap;
   ProcessMap processMap_;
-  void process_put(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_get(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
  public:
   ServProcessor(::std::shared_ptr<ServIf> iface) :
     iface_(iface) {
-    processMap_["put"] = &ServProcessor::process_put;
+    processMap_["get"] = &ServProcessor::process_get;
   }
 
   virtual ~ServProcessor() {}
@@ -239,13 +239,13 @@ class ServMultiface : virtual public ServIf {
     ifaces_.push_back(iface);
   }
  public:
-  void put(std::string& _return, const std::string& key) override {
+  void get(std::string& _return, const std::string& key) override {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->put(_return, key);
+      ifaces_[i]->get(_return, key);
     }
-    ifaces_[i]->put(_return, key);
+    ifaces_[i]->get(_return, key);
     return;
   }
 
@@ -281,9 +281,9 @@ class ServConcurrentClient : virtual public ServIf {
   std::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
-  void put(std::string& _return, const std::string& key) override;
-  int32_t send_put(const std::string& key);
-  void recv_put(std::string& _return, const int32_t seqid);
+  void get(std::string& _return, const std::string& key) override;
+  int32_t send_get(const std::string& key);
+  void recv_get(std::string& _return, const int32_t seqid);
  protected:
   std::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
   std::shared_ptr< ::apache::thrift::protocol::TProtocol> poprot_;

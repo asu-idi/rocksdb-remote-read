@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 
     db->Put(WriteOptions(), "zz", "70");// Put key-value
     std::string result;
-    client.put(result, "zz");
+    client.get(result, "zz");
     std::cout<<result<<" "<<std::endl;
 
     delete db;
