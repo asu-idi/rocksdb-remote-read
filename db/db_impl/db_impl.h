@@ -19,6 +19,11 @@
 #include <utility>
 #include <vector>
 
+#include "Serv.h"
+#include <thrift/transport/TSocket.h>
+#include <thrift/transport/TBufferTransports.h>
+#include <thrift/protocol/TBinaryProtocol.h>
+
 #include "db/column_family.h"
 #include "db/compaction/compaction_iterator.h"
 #include "db/compaction/compaction_job.h"
@@ -69,6 +74,10 @@
 #include "util/thread_local.h"
 
 #include <rest_rpc.hpp>
+
+using namespace apache::thrift;
+using namespace apache::thrift::protocol;
+using namespace apache::thrift::transport;
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -200,7 +209,11 @@ class Directories {
 // divided in several db_impl_*.cc files, besides db_impl.cc.
 class DBImpl : public DB {
  public:
-  rest_rpc::rpc_client client;
+  std::shared_ptr<TSocket> socket; //注意此处的ip和端口
+  std::shared_ptr<TTransport> transport;
+  std::shared_ptr<TProtocol> protocol;
+  ServClient client;
+  //rest_rpc::rpc_client client;
 
   DBImpl(const DBOptions& options, const std::string& dbname,
          const bool seq_per_batch = false, const bool batch_per_txn = true,

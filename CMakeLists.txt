@@ -588,6 +588,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 include_directories(
+        ${PROJECT_SOURCE_DIR}/rpc_demo/gen-cpp
         "/usr/local/include"
         ${PROJECT_SOURCE_DIR}/include/rest_rpc/include
         ${PROJECT_SOURCE_DIR}/include/rest_rpc/thirdparty/msgpack-c/include
@@ -603,6 +604,7 @@ find_package(Threads REQUIRED)
 # Main library source code
 
 set(SOURCES
+        rpc_demo/gen-cpp/Serv.cpp
         cache/cache.cc
         cache/cache_entry_roles.cc
         cache/cache_key.cc

@@ -26,7 +26,7 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-const std::string kDBPath = "/Users/zhenghanghu/Desktop/rest_rpc_demo"; // "/tmp/rocksdbtest-501/dbbench";
+const std::string kDBPath = "/tmp/rocksdbtest-501/dbbench"; //"/Users/zhenghanghu/Desktop/rest_rpc_demo";
 
 Options options;
 DB* db_secondary = nullptr;
@@ -34,15 +34,16 @@ DB* db_secondary = nullptr;
 class ServHandler : virtual public ServIf {
  public:
   ServHandler() {
-    // Your initialization goes here
+
   }
 
   void put(std::string& _return, const std::string& key) {
-    // Your implementation goes here
-    db_secondary->TryCatchUpWithPrimary();
 
-    db_secondary->Get(ReadOptions(), key, &_return); 
-    std::cout<<_return<<std::endl;
+    //test if the overhead is caused by TryCatchUpWithPrimary()
+    db_secondary->TryCatchUpWithPrimary();
+    db_secondary->Get(ReadOptions(), key, &_return);
+    //std::cout<<_return<<std::endl;
+
   }
 
 };
@@ -55,7 +56,7 @@ int main(int argc, char **argv) {
 
   DB::OpenAsSecondary(options, kDBPath, kSecondaryPath, &db_secondary);
 
-  int port = 9090;
+  int port = 9090;//doesn't work because the db instance created need to connect to server
   ::std::shared_ptr<ServHandler> handler(new ServHandler());
   ::std::shared_ptr<TProcessor> processor(new ServProcessor(handler));
   ::std::shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));

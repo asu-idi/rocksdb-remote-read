@@ -246,7 +246,10 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
       own_sfm_(options.sst_file_manager == nullptr),
       closed_(false),
       atomic_flush_install_cv_(&mutex_),
-      client("127.0.0.1", 9000),
+      socket(new TSocket("localhost", 9090)),
+      transport(new TBufferedTransport(socket)),
+      protocol(new TBinaryProtocol(transport)),
+      client(protocol),
       blob_callback_(immutable_db_options_.sst_file_manager.get(), &mutex_,
                      &error_handler_, &event_logger_,
                      immutable_db_options_.listeners, dbname_) {
@@ -254,8 +257,8 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
   // WriteUnprepared, which should use seq_per_batch_.
   assert(batch_per_txn_ || seq_per_batch_);
 
-  client.enable_auto_reconnect(); // automatic reconnect
-  client.enable_auto_heartbeat(); // automatic heartbeat
+  //client.enable_auto_reconnect(); // automatic reconnect
+  //client.enable_auto_heartbeat(); // automatic heartbeat
 
   // Reserve ten files or so for other uses and give the rest to TableCache.
   // Give a large number for setting of "infinite" open files.
@@ -1786,6 +1789,14 @@ Status DBImpl::Get(const ReadOptions& read_options,
   }
 
   if( !read_options.async ){
+
+    std::string result;
+    transport->open();
+    client.put(result, key.ToString());
+    transport->close();
+    //std::cout<<result<<std::endl;
+
+    /* REST RPC implementation
     try {
       bool r = client.connect();
       if (!r) {
@@ -1797,10 +1808,11 @@ Status DBImpl::Get(const ReadOptions& read_options,
       //std::cout<<result<<std::endl;
     } catch (const std::exception &e) {
       std::cout << e.what() << std::endl;
-    }
+    }*/
     return s;
   }
 
+  /* REST RPC implementation
   try {
     bool r = client.connect();
     if (!r) {
@@ -1812,7 +1824,7 @@ Status DBImpl::Get(const ReadOptions& read_options,
     
   } catch (const std::exception &e) {
     std::cout << e.what() << std::endl;
-  }
+  }*/
   
   return s;
 }
