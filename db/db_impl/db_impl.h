@@ -209,10 +209,10 @@ class Directories {
 // divided in several db_impl_*.cc files, besides db_impl.cc.
 class DBImpl : public DB {
  public:
-  std::shared_ptr<TSocket> socket; //注意此处的ip和端口
-  std::shared_ptr<TTransport> transport;
-  std::shared_ptr<TProtocol> protocol;
-  ServClient client;
+  std::vector<std::shared_ptr<TSocket>> sockets; //注意此处的ip和端口
+  std::vector<std::shared_ptr<TTransport>> transports;
+  std::vector<std::shared_ptr<TProtocol>> protocols;
+  std::vector<ServClient> clients;
   //rest_rpc::rpc_client client;
 
   DBImpl(const DBOptions& options, const std::string& dbname,

@@ -1457,7 +1457,7 @@ enum ReadTier {
 
 // Options that control read operations
 struct ReadOptions {
-
+  int thread_id;
   bool remote_read = false;
   bool async = false;
   std::function<void(asio::error_code, string_view)> cb;

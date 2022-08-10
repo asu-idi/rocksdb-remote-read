@@ -4,8 +4,15 @@
 #include "Serv.h"
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
-#include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
+#include <thrift/concurrency/ThreadManager.h>
+#include <thrift/concurrency/ThreadFactory.h>
+#include <thrift/server/TThreadPoolServer.h>
+#include <thrift/server/TThreadedServer.h>
+#include <thrift/transport/TServerSocket.h>
+#include <thrift/transport/TSocket.h>
+#include <thrift/transport/TTransportUtils.h>
+#include <thrift/TToString.h>
 #include <iostream>
 
 #include "rocksdb/db.h"
@@ -20,6 +27,8 @@ using ROCKSDB_NAMESPACE::FlushOptions;
 using ROCKSDB_NAMESPACE::Status;
 using ROCKSDB_NAMESPACE::WriteBatch;
 using ROCKSDB_NAMESPACE::WriteOptions;
+using apache::thrift::concurrency::ThreadManager;
+using apache::thrift::concurrency::ThreadFactory;
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -39,7 +48,7 @@ class ServHandler : virtual public ServIf {
 
   void get(std::string& _return, const std::string& key) {
     //test if the overhead is caused by TryCatchUpWithPrimary()
-    db_secondary->TryCatchUpWithPrimary();
+    //db_secondary->TryCatchUpWithPrimary();
     db_secondary->Get(ReadOptions(), key, &_return);
     //std::cout<<_return<<std::endl;
   }
@@ -61,7 +70,24 @@ int main(int argc, char **argv) {
   ::std::shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
   ::std::shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
 
-  TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
+  //TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
+  
+  const int workerCount = 4;
+
+  std::shared_ptr<ThreadManager> threadManager =
+    ThreadManager::newSimpleThreadManager(workerCount);
+  threadManager->threadFactory(
+    std::make_shared<ThreadFactory>());
+  threadManager->start();
+
+  // This server allows "workerCount" connection at a time, and reuses threads
+  TThreadPoolServer server(
+    processor,
+    serverTransport,
+    transportFactory,
+    protocolFactory,
+    threadManager);
+
   server.serve();
 
   delete db_secondary;

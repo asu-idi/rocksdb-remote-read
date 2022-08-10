@@ -254,11 +254,17 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
   assert(batch_per_txn_ || seq_per_batch_);
   if( options.create_with_thrift_client ){
     std::cout<<"yes"<<std::endl;
-    socket.reset(new TSocket("localhost", 9090));
-    transport.reset(new TBufferedTransport(socket));
-    protocol.reset(new TBinaryProtocol(transport));
-    client = ServClient(protocol);
-    transport->open();
+    for(int i=0;i<4;i++){//todo: use flags_threads to initialize
+      sockets.push_back( std::make_shared<TSocket>("localhost", 9090) );
+      transports.push_back( std::make_shared<TBufferedTransport>(sockets[i]) );
+      protocols.push_back( std::make_shared<TBinaryProtocol>(transports[i]) );
+      clients.push_back( ServClient(protocols[i]) );
+      transports[i]->open();
+    }
+    //socket.reset(new TSocket("localhost", 9090));
+    //transport.reset(new TBufferedTransport(socket));
+    //protocol.reset(new TBinaryProtocol(transport));
+    //client = ServClient(protocol);
   }
   
   //client.enable_auto_reconnect(); // automatic reconnect
@@ -735,9 +741,12 @@ Status DBImpl::CloseImpl() { return CloseHelper(); }
 DBImpl::~DBImpl() {
   // TODO: remove this.
   init_logger_creation_s_.PermitUncheckedError();
-  if( socket!=nullptr ){
-    transport->close();
+
+  if( sockets.size()!=0 ){
+
+    for(int i=0;i<4;i++) transports[i]->close();
   }
+  
   InstrumentedMutexLock closing_lock_guard(&closing_mutex_);
   if (closed_) {
     return;
@@ -1797,7 +1806,9 @@ Status DBImpl::Get(const ReadOptions& read_options,
   if( !read_options.async ){
 
     std::string result;
-    client.get(result, key.ToString());
+    clients[ read_options.thread_id ].get(result, key.ToString());
+    //std::cout<<read_options.thread_id<<" "<<result<<std::endl;
+
     /* REST RPC implementation
     try {
       bool r = client.connect();

@@ -6010,6 +6010,7 @@ class Benchmark {
         //std::cout<<"!! "<<thread->tid<<std::endl;
         options.remote_read = FLAGS_remote_read;
         options.async = FLAGS_async;
+        options.thread_id = thread->tid;
         options.cb = [&async_done](asio::error_code ec, string_view data) {
           if (ec) {                
             std::cout << ec.message() <<" "<< data << std::endl;
