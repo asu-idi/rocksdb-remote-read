@@ -4709,6 +4709,9 @@ class Benchmark {
 
   void OpenDb(Options options, const std::string& db_name,
       DBWithColumnFamilies* db) {
+    if(FLAGS_remote_read){
+      options.create_with_thrift_client = true;
+    }
     uint64_t open_start = FLAGS_report_open_timing ? FLAGS_env->NowNanos() : 0;
     Status s;
     // Open with column families if necessary.

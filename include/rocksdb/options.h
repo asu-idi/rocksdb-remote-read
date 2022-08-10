@@ -450,6 +450,7 @@ class CompactionService : public Customizable {
 };
 
 struct DBOptions {
+  bool create_with_thrift_client = false;
   // The function recovers options to the option as in version 4.6.
   // NOT MAINTAINED: This function has not been and is not maintained.
   // DEPRECATED: This function might be removed in a future release.

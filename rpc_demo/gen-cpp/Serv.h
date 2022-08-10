@@ -165,6 +165,9 @@ class Serv_get_presult {
 
 class ServClient : virtual public ServIf {
  public:
+  ServClient(){
+
+  }
   ServClient(std::shared_ptr< ::apache::thrift::protocol::TProtocol> prot) {
     setProtocol(prot);
   }

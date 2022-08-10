@@ -246,17 +246,21 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
       own_sfm_(options.sst_file_manager == nullptr),
       closed_(false),
       atomic_flush_install_cv_(&mutex_),
-      socket(new TSocket("localhost", 9090)),
-      transport(new TBufferedTransport(socket)),
-      protocol(new TBinaryProtocol(transport)),
-      client(protocol),
       blob_callback_(immutable_db_options_.sst_file_manager.get(), &mutex_,
                      &error_handler_, &event_logger_,
                      immutable_db_options_.listeners, dbname_) {
   // !batch_per_trx_ implies seq_per_batch_ because it is only unset for
   // WriteUnprepared, which should use seq_per_batch_.
   assert(batch_per_txn_ || seq_per_batch_);
-
+  if( options.create_with_thrift_client ){
+    std::cout<<"yes"<<std::endl;
+    socket.reset(new TSocket("localhost", 9090));
+    transport.reset(new TBufferedTransport(socket));
+    protocol.reset(new TBinaryProtocol(transport));
+    client = ServClient(protocol);
+    transport->open();
+  }
+  
   //client.enable_auto_reconnect(); // automatic reconnect
   //client.enable_auto_heartbeat(); // automatic heartbeat
 
@@ -731,7 +735,9 @@ Status DBImpl::CloseImpl() { return CloseHelper(); }
 DBImpl::~DBImpl() {
   // TODO: remove this.
   init_logger_creation_s_.PermitUncheckedError();
-
+  if( socket!=nullptr ){
+    transport->close();
+  }
   InstrumentedMutexLock closing_lock_guard(&closing_mutex_);
   if (closed_) {
     return;
@@ -1791,11 +1797,7 @@ Status DBImpl::Get(const ReadOptions& read_options,
   if( !read_options.async ){
 
     std::string result;
-    transport->open();
     client.get(result, key.ToString());
-    transport->close();
-   // std::cout<<result<<std::endl;
-
     /* REST RPC implementation
     try {
       bool r = client.connect();
@@ -1825,7 +1827,6 @@ Status DBImpl::Get(const ReadOptions& read_options,
   } catch (const std::exception &e) {
     std::cout << e.what() << std::endl;
   }*/
-  
   return s;
 }
 

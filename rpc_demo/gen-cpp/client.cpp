@@ -34,6 +34,7 @@ int main(int argc, char **argv) {
     ServClient client(protocol);
     
     options.create_if_missing = true;
+    options.create_with_thrift_client = true;
     DB::Open(options, kDBPath, &db);// open DB
 
     rocksdb::Iterator* it = db->NewIterator(rocksdb::ReadOptions());
